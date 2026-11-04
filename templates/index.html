@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Disparo de E-mails - Quality Parts</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 600px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h2 { color: #333; text-align: center; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; }
+        input, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; margin-top: 10px; }
+        button:hover { background-color: #0056b3; }
+        .btn-api { background-color: #28a745; }
+        .btn-api:hover { background-color: #218838; }
+        .card { margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; }
+        #resultado, #resultado-api, #resultado-lote { margin-top: 15px; font-weight: bold; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🚀 Painel de Disparo de E-mails</h2>
+    
+    <!-- 1. Formulário para envio manual -->
+    <div class="form-group">
+        <label for="destinatario">E-mail do Destinatário:</label>
+        <input type="email" id="destinatario" placeholder="exemplo@dominio.com">
+    </div>
+
+    <div class="form-group">
+        <label for="assunto">Assunto:</label>
+        <input type="text" id="assunto" placeholder="Assunto da mensagem">
+    </div>
+
+    <div class="form-group">
+        <label for="mensagem">Mensagem:</label>
+        <textarea id="mensagem" rows="4" placeholder="Escreva sua mensagem aqui..."></textarea>
+    </div>
+
+    <button onclick="enviarEmailManual()">Disparar E-mail Individual</button>
+    <p id="resultado"></p>
+
+    <!-- 2. Card de Automação via API -->
+    <div class="card">
+        <h2>🌐 Automação via API</h2>
+        <p style="color: #666; font-size: 14px; text-align: center;">Busca os clientes na web e dispara e-mails em lote automaticamente.</p>
+        <button class="btn-api" onclick="dispararViaApi()">Disparar para Clientes da API</button>
+        <p id="resultado-api"></p>
+    </div>
+
+    <!-- 3. Card de Disparo em Lote Manual -->
+    <div class="card">
+        <h2>👥 Disparo em Lote (Vários E-mails)</h2>
+        <p style="color: #666; font-size: 14px; text-align: center;">Cole os e-mails separados por vírgula para enviar de uma vez só.</p>
+        
+        <div class="form-group">
+            <label for="lista-emails">Lista de E-mails (separados por vírgula):</label>
+            <textarea id="lista-emails" rows="3" placeholder="exemplo1@dominio.com, exemplo2@dominio.com"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="assunto-lote">Assunto do Lote:</label>
+            <input type="text" id="assunto-lote" placeholder="Assunto geral para todos">
+        </div>
+        <div class="form-group">
+            <label for="mensagem-lote">Mensagem do Lote:</label>
+            <textarea id="mensagem-lote" rows="3" placeholder="Mensagem que será enviada para o grupo..."></textarea>
+        </div>
+
+        <button class="btn-api" onclick="dispararEmLoteManual()">Disparar para a Lista</button>
+        <p id="resultado-lote"></p>
+    </div>
+</div>
+
+<script>
+    // Função para envio manual
+    async function enviarEmailManual() {
+        const destinatario = document.getElementById('destinatario').value;
+        const assunto = document.getElementById('assunto').value;
+        const mensagem = document.getElementById('mensagem').value;
+        const resultado = document.getElementById('resultado');
+
+        if (!destinatario || !assunto || !mensagem) {
+            resultado.style.color = 'red';
+            resultado.innerText = '❌ Por favor, preencha todos os campos!';
+            return;
+        }
+
+        resultado.style.color = '#555';
+        resultado.innerText = '🔄 Enviando e-mail...';
+
+        try {
+            const resposta = await fetch('http://127.0.0.1:5000/enviar-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ destinatario, assunto, mensagem })
+            });
+
+            const dados = await resposta.json();
+
+            if (resposta.ok) {
+                resultado.style.color = 'green';
+                resultado.innerText = '✅ ' + dados.mensagem;
+            } else {
+                resultado.style.color = 'red';
+                resultado.innerText = '❌ Erro: ' + dados.mensagem;
+            }
+        } catch (erro) {
+            resultado.style.color = 'red';
+            resultado.innerText = '❌ Falha de conexão com o servidor Python!';
+        }
+    }
+
+    // Função para automação via API
+    async function dispararViaApi() {
+        const resultadoApi = document.getElementById('resultado-api');
+
+        resultadoApi.style.color = '#555';
+        resultadoApi.innerText = '🔄 Buscando API e disparando e-mails...';
+
+        try {
+            const resposta = await fetch('http://127.0.0.1:5000/disparar-clientes-api', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const dados = await resposta.json();
+
+            if (resposta.ok) {
+                resultadoApi.style.color = 'green';
+                resultadoApi.innerText = '✅ ' + dados.mensagem;
+            } else {
+                resultadoApi.style.color = 'red';
+                resultadoApi.innerText = '❌ Erro: ' + dados.mensagem;
+            }
+        } catch (erro) {
+            resultadoApi.style.color = 'red';
+            resultadoApi.innerText = '❌ Falha de conexão com o servidor Python!';
+        }
+    }
+
+    // Função para disparo em lote manual
+    async function dispararEmLoteManual() {
+        const emailsTexto = document.getElementById('lista-emails').value;
+        const assunto = document.getElementById('assunto-lote').value;
+        const mensagem = document.getElementById('mensagem-lote').value;
+        const resultadoLote = document.getElementById('resultado-lote');
+
+        if (!emailsTexto || !assunto || !mensagem) {
+            resultadoLote.style.color = 'red';
+            resultadoLote.innerText = '❌ Preencha todos os campos do lote!';
+            return;
+        }
+
+        const listaDestinatarios = emailsTexto.split(',').map(e => e.trim()).filter(e => e !== "");
+
+        resultadoLote.style.color = '#555';
+        resultadoLote.innerText = `🔄 Processando envio para ${listaDestinatarios.length} pessoas...`;
+
+        try {
+            const resposta = await fetch('http://127.0.0.1:5000/enviar-lote-manual', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ destinatarios: listaDestinatarios, assunto, mensagem })
+            });
+
+            const dados = await resposta.json();
+
+            if (resposta.ok) {
+                resultadoLote.style.color = 'green';
+                resultadoLote.innerText = '✅ ' + dados.mensagem;
+            } else {
+                resultadoLote.style.color = 'red';
+                resultadoLote.innerText = '❌ Erro: ' + dados.mensagem;
+            }
+        } catch (erro) {
+            resultadoLote.style.color = 'red';
+            resultadoLote.innerText = '❌ Falha de conexão com o servidor!';
+        }
+    }
+</script>
+
+</body>
+</html>

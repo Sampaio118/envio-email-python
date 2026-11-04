@@ -1,32 +1,33 @@
 from email_service import DisparadorEmail
+import os
+from dotenv import load_dotenv
 
-def main():
-    print("🚀 Iniciando pipeline de disparo de e-mails...")
-    
-    # Instancia o serviço
-    disparador = DisparadorEmail()
+load_dotenv()
 
-    # Lista oficial de destinatários
-    lista_emails = [
-        "cliente1_teste@empresa.com",
-        "cliente2_teste@empresa.com",
-        "gerencia_teste@empresa.com"
-    ]
 
-    assunto = "Alinhamento Estratégico - Reunião Geral"
-    corpo = """Olá, equipe!
 
-Este é o envio oficial automatizado via pipeline estruturado.
-Atenciosamente,
-Lucas Sampaio
-"""
-
-    # Executa a função da classe
-    disparador.enviar_em_lote(
-        lista_destinatarios=lista_emails,
-        assunto=assunto,
-        corpo_email=corpo
-    )
 
 if __name__ == "__main__":
-    main()
+    # Sua lista de clientes/destinatários
+    clientes = [
+        "cliente1@email.com",
+        "cliente2@email.com",
+        "cliente3@email.com",
+        "cliente4@email.com",
+        "cliente5@email.com",
+        "cliente6@email.com",
+        "cliente7@email.com",
+        "cliente8@email.com",
+        "cliente9@email.com",
+    ]
+
+    assunto = "Atualização de Sistema e Rotas"
+    corpo = "Olá! Segue o informativo gerado pelo sistema de automação."
+
+    # Instancia o disparador (ele vai ler o .env atual automaticamente)
+    disparador = DisparadorEmail(os.getenv("SMTP_HOST"), os.getenv("SMTP_PORT"), os.getenv("SMTP_USER"), os.getenv("SMTP_PASS"))
+
+    disparador2 = DisparadorEmail(os.getenv("SMTP_HOST"), os.getenv("SMTP_PORT"), os.getenv("SMTP_USER2"), os.getenv("SMTP_PASS"))
+    
+    # Executa o disparo para a lista
+    disparador.enviar_para_lista(clientes, assunto, corpo)

@@ -1,36 +1,43 @@
-import os
-import smtplib
+
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from dotenv import load_dotenv
+import smtplib
 
-load_dotenv()
+# Carrega as variáveis do arquivo .env
+
 
 class DisparadorEmail:
-    def __init__(self, host=None, port=None, user=None, password=None):
-        self.smtp_host = host or os.getenv("SMTP_HOST", "smtp.ethereal.email")
-        self.smtp_port = int(port or os.getenv("SMTP_PORT", 587))
-        self.smtp_user = user or os.getenv("SMTP_USER")
-        self.smtp_pass = password or os.getenv("SMTP_PASS")
 
-    def enviar_em_lote(self, lista_destinatarios, assunto, corpo_email):
-        """Dispara e-mails em lote utilizando uma única conexão SMTP."""
+    def __init__(self, host, port, user, password):
+        self.smtp_host = host
+        self.smtp_port = port
+        # Ele sempre vai pegar o remetente que estiver ativo no .env
+        self.smtp_user = user
+        self.smtp_pass = password
+
+    def enviar_para_lista(self, lista_destinatarios, assunto, corpo_email):
+        """Envia a mesma mensagem para uma lista usando o remetente ativo no .env"""
         try:
+            print(f"Conectando ao servidor SMTP com o remetente: {self.smtp_user}")
             servidor = smtplib.SMTP(self.smtp_host, self.smtp_port)
             servidor.starttls()
             servidor.login(self.smtp_user, self.smtp_pass)
+
+            print(f"Iniciando disparos para {len(lista_destinatarios)} destinatários...")
 
             for destinatario in lista_destinatarios:
                 msg = MIMEMultipart()
                 msg["From"] = self.smtp_user
                 msg["To"] = destinatario
                 msg["Subject"] = assunto
+
                 msg.attach(MIMEText(corpo_email, "plain"))
 
                 servidor.sendmail(msg["From"], msg["To"], msg.as_string())
-                print(f" -> 🚀 Enviado com sucesso para: {destinatario}")
+                print(f"-> E-mail enviado com sucesso para: {destinatario}")
 
             servidor.quit()
-            print("\n🎉 Lote de e-mails processado com sucesso!")
+            print("Disparos finalizados com sucesso!")
+
         except Exception as erro:
-            print(f"❌ Erro no envio: {erro}")
+            print(f"Ocorreu um erro no envio: {erro}")

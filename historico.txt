@@ -1,0 +1,2 @@
+[04/11/2026 09:21:03] - Destinatário: API Externa (Lote) - Status: Sucesso - 10 clientes carregados
+[04/11/2026 09:38:50] - Destinatário: API Externa (Lote) - Status: Sucesso - 10 clientes carregados
