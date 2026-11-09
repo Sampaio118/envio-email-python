@@ -4,15 +4,23 @@ import threading
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS  # Importa o CORS
 from dotenv import load_dotenv
-from utils import registrar_log
+
+# Importações limpas do utils (sem duplicar nada)
+from utils import registrar_log, EMAILS_CADASTRADOS
 
 # Carrega as variáveis do arquivo .env
 load_dotenv()
 
-# 1. Inicializa o aplicativo web Flask
+CAMPOS_OBRIGATORIOS = ("SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASS")
+
+for campo in CAMPOS_OBRIGATORIOS:
+    if not os.getenv(campo):
+        raise ValueError(f"⚠️ Atenção: O parâmetro obrigatório '{campo}' não foi configurado!")
+    
+# Inicializa o aplicativo web Flask
 app = Flask(__name__)
 
-# 2. Ativa o CORS no aplicativo Flask para aceitar requisições do frontend
+# Ativa o CORS no aplicativo Flask para aceitar requisições do frontend
 CORS(app)
 
 # Importa a sua classe de envio de e-mail
@@ -47,7 +55,6 @@ def api_enviar_email():
             }), 400
 
         # Instancia a classe exigindo os dados do .env
-
         disparador = DisparadorEmail(
             host=os.getenv("SMTP_HOST"),
             port=int(os.getenv("SMTP_PORT", 587)),
@@ -55,7 +62,7 @@ def api_enviar_email():
             password=os.getenv("SMTP_PASS"),
         )
 
-        # Executa o disparo do e-mail (descomente quando quiser enviar de verdade)
+        # Executa o disparo do e-mail
         disparador.enviar_mensagem(destinatario=destinatario, assunto=assunto, corpo=mensagem)
 
         print(f"E-mail disparado com sucesso para: {destinatario}")
@@ -67,6 +74,7 @@ def api_enviar_email():
 
     except Exception as e:
         return jsonify({"status": "erro", "mensagem": str(e)}), 500
+
 
 @app.route("/enviar-email-lote", methods=["POST"])
 def api_enviar_email_lote():
@@ -90,7 +98,7 @@ def api_enviar_email_lote():
             password=os.getenv("SMTP_PASS"),
         )
 
-        # Executa o disparo do e-mail (descomente quando quiser enviar de verdade)
+        # Executa o disparo do e-mail
         for email in emails:
             disparador.enviar_mensagem(destinatario=email, assunto=assunto, corpo=mensagem)
 
@@ -105,13 +113,13 @@ def api_enviar_email_lote():
         return jsonify({"status": "erro", "mensagem": str(e)}), 500
 
 
-# Rota para o botão de automação via API do seu frontend
+# Rota para o botão de automação via API do seu frontend (já com lotes configurados!)
 @app.route("/disparar-clientes-api", methods=["POST"])
 def disparar_clientes_api():
     try:
         print("Buscando clientes na API e iniciando disparos em lote...")
         
-        # 1. Pega a URL da API diretamente do .env (sem hardcode!)
+        #  Pega a URL da API diretamente do .env (sem hardcode!)
         url_api = os.getenv("API_JSONPLACEHOLDER_URL")
         if not url_api:
             return jsonify({"status": "erro", "mensagem": "API_JSONPLACEHOLDER_URL não configurada no .env"}), 500
@@ -121,10 +129,9 @@ def disparar_clientes_api():
             return jsonify({"status": "erro", "mensagem": "Falha ao conectar com a API externa de clientes."}), 500
 
         clientes = resposta.json()
-    #  ADIÇÃO CIRÚRGICA: Registra no log que a API foi consultada com sucesso
         registrar_log("API Externa (Lote)", f"Sucesso - {len(clientes)} clientes carregados")
 
-        # 2. Instancia o disparador usando as credenciais do .env
+        #  Instancia o disparador usando as credenciais do .env
         disparador = DisparadorEmail(
             host=os.getenv("SMTP_HOST"),
             port=int(os.getenv("SMTP_PORT", 587)),
@@ -133,20 +140,25 @@ def disparar_clientes_api():
         )
 
         contador = 0
-        # 3. Percorre a lista obtida e dispara para cada cliente
-        for cliente in clientes[:5]:  # Limitado aos 5 primeiros para teste seguro
-            nome = cliente.get('name')
-            email = cliente.get('email')
-            assunto = "Atualização de Processos - Quality Parts"
-            corpo = f"Olá {nome}, informamos que novos dados e rotas foram atualizados em nosso sistema."
+        tamanho_lote = 2  # Aqui você altera o tamanho do lote facilmente (de 2 em 2)
 
-            # disparador.enviar_mensagem(destinatario=email, assunto=assunto, corpo=corpo)
-            print(f"-> E-mail processado para: {email} ({nome})")
-            contador += 1
+     # Percorre a lista fatiando em lotes sem perder a estrutura que você conhece
+        for i in range(0, len(clientes), tamanho_lote):
+            lote_atual = clientes[i : i + tamanho_lote]
+
+            for cliente in lote_atual:
+                nome = cliente.get('name')
+                email = cliente.get('email')
+                assunto = "Atualização de Processos - Quality Parts"
+                corpo = f"Olá {nome}, informamos que novos dados e rotas foram atualizados em nosso sistema."
+
+                # disparador.enviar_mensagem(destinatario=email, assunto=assunto, corpo=corpo)
+                print(f"-> E-mail processado para: {email} ({nome})")
+                contador += 1
 
         return jsonify({
             "status": "sucesso",
-            "mensagem": f"Automação concluída! {contador} e-mails disparados para os clientes da API."
+            "mensagem": f"Automação em lotes concluída! {contador} e-mails processados em blocos de {tamanho_lote}."
         }), 200
 
     except Exception as e:
