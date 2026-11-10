@@ -7,7 +7,7 @@
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; display: flex; justify-content: center; }
         .container { width: 100%; max-width: 600px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h2 { color: #333; text-align: center; }
+        h2 { color: #333; text-align: center; margin-top: 0; }
         .form-group { margin-bottom: 15px; }
         label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; }
         input, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
@@ -17,6 +17,37 @@
         .btn-api:hover { background-color: #218838; }
         .card { margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; }
         #resultado, #resultado-api, #resultado-lote { margin-top: 15px; font-weight: bold; text-align: center; }
+        
+        /* Estilo da Help Bar no Topo */
+        .help-bar {
+            background-color: #e2f0d9;
+            border-left: 5px solid #28a745;
+            padding: 12px 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .help-bar p {
+            margin: 0;
+            color: #2c5e2a;
+            font-size: 13px;
+        }
+        .help-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            width: auto;
+            margin-top: 0;
+            white-space: nowrap;
+        }
+        .help-btn:hover { background-color: #218838; }
+        #feedback-api { margin-top: 5px; margin-bottom: 15px; font-weight: bold; text-align: center; font-size: 13px; }
     </style>
 </head>
 <body>
@@ -24,6 +55,13 @@
 <div class="container">
     <h2>🚀 Painel de Disparo de E-mails</h2>
     
+    <!-- BARRA DE AJUDA (HELP BAR) COM BOTÃO DA API -->
+    <div class="help-bar">
+        <p>💡 <strong>Central de Ajuda:</strong> Clique ao lado para puxar os contatos da API direto para o lote.</p>
+        <button class="help-btn" onclick="puxarContatosDaApi()">📥 Carregar API</button>
+    </div>
+    <p id="feedback-api"></p>
+
     <!-- 1. Formulário para envio manual -->
     <div class="form-group">
         <label for="destinatario">E-mail do Destinatário:</label>
@@ -110,6 +148,33 @@
         } catch (erro) {
             resultado.style.color = 'red';
             resultado.innerText = '❌ Falha de conexão com o servidor Python!';
+        }
+    }
+
+    // Função para buscar contatos da API de dados e preencher os campos automaticamente
+    async function puxarContatosDaApi() {
+        const feedback = document.getElementById('feedback-api');
+        feedback.style.color = '#555';
+        feedback.innerText = '🔄 Consultando API de dados...';
+
+        try {
+            const resposta = await fetch('http://127.0.0.1:5000/api/obter-contatos');
+            const dados = await resposta.json();
+
+            if (resposta.ok) {
+                document.getElementById('lista-emails').value = dados.emails.join(', ');
+                document.getElementById('assunto-lote').value = "Campanha Integrada - API Python";
+                document.getElementById('mensagem-lote').value = "Olá! Esta mensagem foi gerada automaticamente integrando dados de uma API externa.";
+                
+                feedback.style.color = 'green';
+                feedback.innerText = `✅ Sucesso! ${dados.emails.length} e-mails injetados no campo de lote.`;
+            } else {
+                feedback.style.color = 'red';
+                feedback.innerText = '❌ Erro ao buscar dados da API.';
+            }
+        } catch (erro) {
+            feedback.style.color = 'red';
+            feedback.innerText = '❌ Falha de conexão com a rota da API!';
         }
     }
 
