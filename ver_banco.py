@@ -1,8 +1,7 @@
+# ver_bancos.py
 from app import app, db, HistoricoEnvio
 
-# Abre o contexto da aplicação Flask para acessar o banco
 with app.app_context():
-    # Busca todos os registros do banco ordenados do mais recente para o antigo
     registros = HistoricoEnvio.query.all()
 
     print("=" * 65)

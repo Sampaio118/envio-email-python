@@ -1,28 +1,35 @@
+# utils.py
 import datetime
 import time
+from dotenv import load_dotenv
+from email_service import DisparadorEmail
+from app import app, db, HistoricoEnvio
 
+# Carrega as variáveis do ambiente
+load_dotenv()
 
-def registrar_log(destinatario, status):
-    """Função auxiliar que registra cada tentativa de envio de e-mail
-
-    em um arquivo de texto de log, salvando a data, a hora e o status.
-    """
+def registrar_no_banco_e_log(destinatario, status):
     data_hora_atual = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-    linha_log = (
-        f"[{data_hora_atual}] - Destinatário: {destinatario} | Status: {status}\n"
-    )
-
-    # Salva no arquivo historico.txt de forma segura
+    
+    # 1. Salva no arquivo de texto de segurança (historico.txt)
+    linha_log = f"[{data_hora_atual}] - Destinatário: {destinatario} | Status: {status}\n"
     with open("historico.txt", "a", encoding="utf-8") as arquivo:
         arquivo.write(linha_log)
 
-    print(f"[LOG SALVO] {linha_log.strip()}")
+    # 2. Salva oficialmente no Banco de Dados (disparador.db) via SQLAlchemy
+    with app.app_context():
+        try:
+            # Enviando apenas os campos essenciais que o model do app.py espera
+            novo_registro = HistoricoEnvio(
+                destinatario=destinatario,
+                status=status
+            )
+            db.session.add(novo_registro)
+            db.session.commit()
+        except Exception as e:
+            print(f"[ERRO DE BANCO] Não foi possível salvar no SQLite: {e}")
 
-
-# ==========================================
-#      -----SUA LISTA REAL DE CLIENTES-----
-# ==========================================
-
+# Lista de e-mails processada em off
 EMAILS_CADASTRADOS = [
     "cliente1@seuemail.com",
     "cliente2@seuemail.com",
@@ -32,59 +39,33 @@ EMAILS_CADASTRADOS = [
     "cliente6@seuemail.com",
 ]
 
-
-def disparar_email_simulado(destinatario):
-    """Substitua esta lógica pelo envio real via smtplib / API de e-mail."""
-    # Simulação de sucesso
-    return True
-
-
-def enviar_em_lotes(
-    lista_emails, tamanho_lote=2, tempo_espera_segundos=5
-):
-    """Processa a lista de e-mails em blocos/lotes menores.
-
-    :param lista_emails: Lista completa de destinatários :param tamanho_lote:
-    Quantidade de e-mails enviados por bloco :param tempo_espera_segundos: Pausa
-    em segundos entre cada lote
-    """
+def enviar_em_lotes(lista_emails, tamanho_lote=2, tempo_espera_segundos=5):
+    disparador = DisparadorEmail()
     total_emails = len(lista_emails)
-    print(
-        f"--- Iniciando envio total de {total_emails} e-mails (Lotes de {tamanho_lote}) ---\n"
-    )
+    print(f"--- Iniciando disparo em lotes ({total_emails} destinatários na fila) ---\n")
 
-    # Percorre a lista em saltos do tamanho do lote
     for i in range(0, total_emails, tamanho_lote):
         lote_atual = lista_emails[i : i + tamanho_lote]
         numero_lote = (i // tamanho_lote) + 1
 
-        print(
-            f"\n--- Processando Lote #{numero_lote} ({len(lote_atual)} destinatários) ---"
-        )
+        print(f"[PROCESSAMENTO] Executando Lote #{numero_lote} ({len(lote_atual)} mensagens em off)...")
 
         for email in lote_atual:
-            sucesso = disparar_email_simulado(email)
+            try:
+                disparador.enviar_mensagem(email, "Assunto do Lote", "Corpo da mensagem em lote.")
+                registrar_no_banco_e_log(email, "SUCESSO")
+            except Exception as e:
+                registrar_no_banco_e_log(email, "FALHA")
 
-            if sucesso:
-                registrar_log(email, "SUCESSO")
-            else:
-                registrar_log(email, "FALHA")
-
-        # Se ainda houver mais e-mails para enviar, faz a pausa técnica
         if i + tamanho_lote < total_emails:
-            print(
-                f"Aguardando {tempo_espera_segundos} segundos antes do próximo lote..."
-            )
+            print(f"-> Pausa de {tempo_espera_segundos} segundos antes do próximo lote...\n")
             time.sleep(tempo_espera_segundos)
 
-    print("\n--- Processamento de todos os lotes finalizado com sucesso! ---")
+    print("\n--- Todos os lotes finalizados! O banco de dados foi atualizado. ---")
 
-
-# Execução do envio
 if __name__ == "__main__":
-    # Configuração dos parâmetros de batching
-    TAMANHO_DO_LOTE = 2  # Quantos e-mails saem por vez
-    INTERVALO_SEGUNDOS = 3  # Tempo de espera entre os blocos
+    TAMANHO_DO_LOTE = 2
+    INTERVALO_SEGUNDOS = 3
 
     enviar_em_lotes(
         EMAILS_CADASTRADOS,

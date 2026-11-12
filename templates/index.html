@@ -3,249 +3,261 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Disparo de E-mails - Quality Parts</title>
+    <title>Painel de Disparo de E-mails - Corporativo</title>
+    <!-- Tailwind CSS para estilização moderna -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 600px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h2 { color: #333; text-align: center; margin-top: 0; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; }
-        input, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; margin-top: 10px; }
-        button:hover { background-color: #0056b3; }
-        .btn-api { background-color: #28a745; }
-        .btn-api:hover { background-color: #218838; }
-        .card { margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; }
-        #resultado, #resultado-api, #resultado-lote { margin-top: 15px; font-weight: bold; text-align: center; }
-        
-        /* Estilo da Help Bar no Topo */
-        .help-bar {
-            background-color: #e2f0d9;
-            border-left: 5px solid #28a745;
-            padding: 12px 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        body {
+            background-color: #f1f5f9; /* Fundo cinza moderno */
         }
-        .help-bar p {
-            margin: 0;
-            color: #2c5e2a;
-            font-size: 13px;
+        .bg-navy {
+            background-color: #0f172a; /* Azul Marinho Profundo */
         }
-        .help-btn {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 13px;
-            width: auto;
-            margin-top: 0;
-            white-space: nowrap;
+        .text-navy {
+            color: #0f172a;
         }
-        .help-btn:hover { background-color: #218838; }
-        #feedback-api { margin-top: 5px; margin-bottom: 15px; font-weight: bold; text-align: center; font-size: 13px; }
+        .btn-navy {
+            background-color: #1e293b;
+        }
+        .btn-navy:hover {
+            background-color: #334155;
+        }
     </style>
 </head>
-<body>
+<body class="min-h-screen py-10 px-4">
 
-<div class="container">
-    <h2>🚀 Painel de Disparo de E-mails</h2>
-    
-    <!-- BARRA DE AJUDA (HELP BAR) COM BOTÃO DA API -->
-    <div class="help-bar">
-        <p>💡 <strong>Central de Ajuda:</strong> Clique ao lado para puxar os contatos da API direto para o lote.</p>
-        <button class="help-btn" onclick="puxarContatosDaApi()">📥 Carregar API</button>
-    </div>
-    <p id="feedback-api"></p>
-
-    <!-- 1. Formulário para envio manual -->
-    <div class="form-group">
-        <label for="destinatario">E-mail do Destinatário:</label>
-        <input type="email" id="destinatario" placeholder="exemplo@dominio.com">
-    </div>
-
-    <div class="form-group">
-        <label for="assunto">Assunto:</label>
-        <input type="text" id="assunto" placeholder="Assunto da mensagem">
-    </div>
-
-    <div class="form-group">
-        <label for="mensagem">Mensagem:</label>
-        <textarea id="mensagem" rows="4" placeholder="Escreva sua mensagem aqui..."></textarea>
-    </div>
-
-    <button onclick="enviarEmailManual()">Disparar E-mail Individual</button>
-    <p id="resultado"></p>
-
-    <!-- 2. Card de Automação via API -->
-    <div class="card">
-        <h2>🌐 Automação via API</h2>
-        <p style="color: #666; font-size: 14px; text-align: center;">Busca os clientes na web e dispara e-mails em lote automaticamente.</p>
-        <button class="btn-api" onclick="dispararViaApi()">Disparar para Clientes da API</button>
-        <p id="resultado-api"></p>
-    </div>
-
-    <!-- 3. Card de Disparo em Lote Manual -->
-    <div class="card">
-        <h2>👥 Disparo em Lote (Vários E-mails)</h2>
-        <p style="color: #666; font-size: 14px; text-align: center;">Cole os e-mails separados por vírgula para enviar de uma vez só.</p>
+    <div class="max-w-4xl mx-auto space-y-8">
         
-        <div class="form-group">
-            <label for="lista-emails">Lista de E-mails (separados por vírgula):</label>
-            <textarea id="lista-emails" rows="3" placeholder="exemplo1@dominio.com, exemplo2@dominio.com"></textarea>
-        </div>
-        <div class="form-group">
-            <label for="assunto-lote">Assunto do Lote:</label>
-            <input type="text" id="assunto-lote" placeholder="Assunto geral para todos">
-        </div>
-        <div class="form-group">
-            <label for="mensagem-lote">Mensagem do Lote:</label>
-            <textarea id="mensagem-lote" rows="3" placeholder="Mensagem que será enviada para o grupo..."></textarea>
-        </div>
+        <!-- CABEÇALHO -->
+        <header class="bg-navy text-white p-6 rounded-2xl shadow-lg text-center">
+            <h1 class="text-3xl font-bold tracking-wide">🚀 Disparador de E-mails Inteligente</h1>
+            <p class="text-slate-300 mt-1 text-sm">Painel automatizado com rotas Flask, ORM (SQLite) e Interface Moderna</p>
+        </header>
 
-        <button class="btn-api" onclick="dispararEmLoteManual()">Disparar para a Lista</button>
-        <p id="resultado-lote"></p>
+        <!-- SEÇÃO 1: ENVIO INDIVIDUAL -->
+        <section class="bg-white p-6 rounded-2xl shadow-md border border-slate-200">
+            <h2 class="text-xl font-bold text-navy mb-4 flex items-center gap-2">
+                ✉️ 1. Envio Individual de E-mail
+            </h2>
+            <form id="formIndividual" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">E-mail do Destinatário</label>
+                        <input type="email" id="indDestinatario" required 
+                            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-800 focus:outline-none"
+                            placeholder="exemplo@dominio.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Assunto</label>
+                        <input type="text" id="indAssunto" required 
+                            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-800 focus:outline-none"
+                            placeholder="Assunto da mensagem">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Mensagem</label>
+                    <textarea id="indMensagem" rows="3" required 
+                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-800 focus:outline-none"
+                        placeholder="Escreva sua mensagem aqui..."></textarea>
+                </div>
+                <button type="submit" class="btn-navy text-white px-6 py-2.5 rounded-lg font-semibold transition w-full md:w-auto cursor-pointer">
+                    Enviar E-mail Individual
+                </button>
+            </form>
+            <div id="statusIndividual" class="mt-3 text-sm font-medium"></div>
+        </section>
+
+        <!-- SEÇÃO 2: PRÉ-VISUALIZAÇÃO DE CONTATOS (DADOS DA API) -->
+        <section class="bg-white p-6 rounded-2xl shadow-md border border-slate-200">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+                <div>
+                    <h2 class="text-xl font-bold text-navy flex items-center gap-2">
+                        🔍 2. Pré-visualização de Contatos via API
+                    </h2>
+                    <p class="text-slate-500 text-sm mt-1">Carregue e confira os contatos vindos do sistema antes de disparar o lote.</p>
+                </div>
+                <button id="btnCarregarApi" class="bg-slate-700 hover:bg-slate-800 text-white px-4 py-2.5 rounded-lg font-medium text-sm transition cursor-pointer">
+                    📥 Carregar Dados da API
+                </button>
+            </div>
+            
+            <!-- Tabela de Pré-visualização -->
+            <div class="overflow-x-auto border border-slate-200 rounded-lg">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-700 text-sm border-b border-slate-200">
+                            <th class="p-3">Nome do Contato</th>
+                            <th class="p-3">E-mail Vinculado</th>
+                            <th class="p-3 text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaContatos" class="text-sm text-slate-600">
+                        <tr>
+                            <td colspan="3" class="p-4 text-center text-slate-400">Clique em "Carregar Dados da API" para buscar os registros.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- SEÇÃO 3: ENVIO EM LOTE COM BARRA DE PROGRESSO -->
+        <section class="bg-white p-6 rounded-2xl shadow-md border border-slate-200">
+            <h2 class="text-xl font-bold text-navy mb-4 flex items-center gap-2">
+                🚀 3. Disparo em Lote Automatizado
+            </h2>
+            <div class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Assunto do Lote</label>
+                        <input type="text" id="loteAssunto" value="Campanha Integrada - API Python" 
+                            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-800 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Mensagem do Lote</label>
+                        <input type="text" id="loteMensagem" value="Olá! Esta mensagem foi enviada em lote integrando dados de uma API externa." 
+                            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-800 focus:outline-none">
+                    </div>
+                </div>
+
+                <button id="btnDispararLote" class="btn-navy text-white px-6 py-2.5 rounded-lg font-semibold transition w-full md:w-auto cursor-pointer">
+                    Disparar Lote para Todos os Contatos Carregados
+                </button>
+
+                <!-- Barra de Progresso Dinâmica -->
+                <div class="mt-6 space-y-2">
+                    <div class="flex justify-between text-sm font-medium text-slate-600">
+                        <span id="progressoTexto">Progresso do Envio: 0%</span>
+                        <span id="statusLoteContador">Aguardando início...</span>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-4 overflow-hidden border border-slate-300">
+                        <div id="barraProgresso" class="bg-blue-600 h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </div>
-</div>
 
-<script>
-    // Função para envio manual
-    async function enviarEmailManual() {
-        const destinatario = document.getElementById('destinatario').value;
-        const assunto = document.getElementById('assunto').value;
-        const mensagem = document.getElementById('mensagem').value;
-        const resultado = document.getElementById('resultado');
+    <!-- SCRIPT DE CONTROLE DO FRONTEND -->
+    <script>
+        let emailsGlobais = [];
 
-        if (!destinatario || !assunto || !mensagem) {
-            resultado.style.color = 'red';
-            resultado.innerText = '❌ Por favor, preencha todos os campos!';
-            return;
-        }
+        // 1. Envio Individual
+        document.getElementById("formIndividual").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const statusDiv = document.getElementById("statusIndividual");
+            statusDiv.innerHTML = "<span class='text-blue-600'>🔄 Enviando e-mail individual...</span>";
 
-        resultado.style.color = '#555';
-        resultado.innerText = '🔄 Enviando e-mail...';
+            const dados = {
+                destinatario: document.getElementById("indDestinatario").value,
+                assunto: document.getElementById("indAssunto").value,
+                mensagem: document.getElementById("indMensagem").value
+            };
 
-        try {
-            const resposta = await fetch('http://127.0.0.1:5000/enviar-email', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ destinatario, assunto, mensagem })
-            });
-
-            const dados = await resposta.json();
-
-            if (resposta.ok) {
-                resultado.style.color = 'green';
-                resultado.innerText = '✅ ' + dados.mensagem;
-            } else {
-                resultado.style.color = 'red';
-                resultado.innerText = '❌ Erro: ' + dados.mensagem;
+            try {
+                const response = await fetch("/enviar-email", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dados)
+                });
+                const resultado = await response.json();
+                if (response.ok) {
+                    statusDiv.innerHTML = `<span class='text-green-600 font-semibold'>✔️ ${resultado.mensagem}</span>`;
+                    document.getElementById("formIndividual").reset();
+                } else {
+                    statusDiv.innerHTML = `<span class='text-red-600 font-semibold'>❌ ${resultado.mensagem}</span>`;
+                }
+            } catch (err) {
+                statusDiv.innerHTML = `<span class='text-red-600 font-semibold'>❌ Erro de conexão com o servidor Python.</span>`;
             }
-        } catch (erro) {
-            resultado.style.color = 'red';
-            resultado.innerText = '❌ Falha de conexão com o servidor Python!';
-        }
-    }
+        });
 
-    // Função para buscar contatos da API de dados e preencher os campos automaticamente
-    async function puxarContatosDaApi() {
-        const feedback = document.getElementById('feedback-api');
-        feedback.style.color = '#555';
-        feedback.innerText = '🔄 Consultando API de dados...';
+        // 2. Carregar dados da API (Pré-visualização na Tabela)
+        document.getElementById("btnCarregarApi").addEventListener("click", async () => {
+            const tbody = document.getElementById("tabelaContatos");
+            tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-blue-600 font-medium">🔄 Consultando API de dados...</td></tr>`;
 
-        try {
-            const resposta = await fetch('http://127.0.0.1:5000/api/obter-contatos');
-            const dados = await resposta.json();
+            try {
+                const response = await fetch("/api/obter-contatos");
+                const dados = await response.json();
 
-            if (resposta.ok) {
-                document.getElementById('lista-emails').value = dados.emails.join(', ');
-                document.getElementById('assunto-lote').value = "Campanha Integrada - API Python";
-                document.getElementById('mensagem-lote').value = "Olá! Esta mensagem foi gerada automaticamente integrando dados de uma API externa.";
-                
-                feedback.style.color = 'green';
-                feedback.innerText = `✅ Sucesso! ${dados.emails.length} e-mails injetados no campo de lote.`;
-            } else {
-                feedback.style.color = 'red';
-                feedback.innerText = '❌ Erro ao buscar dados da API.';
+                if (response.ok && dados.emails && dados.emails.length > 0) {
+                    emailsGlobais = dados.emails;
+                    tbody.innerHTML = "";
+                    
+                    // Nomes simulados para acompanhar os e-mails na tabela
+                    const nomesMock = ["Lucas Sampaio", "Gabrielle Alves", "Ana Carolina", "Cliente VIP", "Parceiro Comercial", "Suporte Técnico"];
+                    
+                    emailsGlobais.forEach((email, index) => {
+                        tbody.innerHTML += `
+                            <tr class="border-b border-slate-100 hover:bg-slate-50 transition">
+                                <td class="p-3 font-medium text-slate-800">${nomesMock[index] || "Contato " + (index + 1)}</td>
+                                <td class="p-3 text-slate-600">${email}</td>
+                                <td class="p-3 text-center"><span class="bg-green-100 text-green-700 text-xs px-2.5 py-1 rounded-full font-semibold">Pronto</span></td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-red-500 font-medium">Nenhum contato retornado pela API.</td></tr>`;
+                }
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-red-500 font-medium">❌ Erro de conexão ao buscar dados da API.</td></tr>`;
             }
-        } catch (erro) {
-            feedback.style.color = 'red';
-            feedback.innerText = '❌ Falha de conexão com a rota da API!';
-        }
-    }
+        });
 
-    // Função para automação via API
-    async function dispararViaApi() {
-        const resultadoApi = document.getElementById('resultado-api');
-
-        resultadoApi.style.color = '#555';
-        resultadoApi.innerText = '🔄 Buscando API e disparando e-mails...';
-
-        try {
-            const resposta = await fetch('http://127.0.0.1:5000/disparar-clientes-api', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-
-            const dados = await resposta.json();
-
-            if (resposta.ok) {
-                resultadoApi.style.color = 'green';
-                resultadoApi.innerText = '✅ ' + dados.mensagem;
-            } else {
-                resultadoApi.style.color = 'red';
-                resultadoApi.innerText = '❌ Erro: ' + dados.mensagem;
+        // 3. Disparo em Lote com Barra de Progresso
+        document.getElementById("btnDispararLote").addEventListener("click", async () => {
+            if (emailsGlobais.length === 0) {
+                alert("Por favor, clique primeiro em 'Carregar Dados da API' na Seção 2 para preencher os destinatários!");
+                return;
             }
-        } catch (erro) {
-            resultadoApi.style.color = 'red';
-            resultadoApi.innerText = '❌ Falha de conexão com o servidor Python!';
-        }
-    }
 
-    // Função para disparo em lote manual
-    async function dispararEmLoteManual() {
-        const emailsTexto = document.getElementById('lista-emails').value;
-        const assunto = document.getElementById('assunto-lote').value;
-        const mensagem = document.getElementById('mensagem-lote').value;
-        const resultadoLote = document.getElementById('resultado-lote');
+            const barra = document.getElementById("barraProgresso");
+            const textoProgresso = document.getElementById("progressoTexto");
+            const statusContador = document.getElementById("statusLoteContador");
 
-        if (!emailsTexto || !assunto || !mensagem) {
-            resultadoLote.style.color = 'red';
-            resultadoLote.innerText = '❌ Preencha todos os campos do lote!';
-            return;
-        }
+            barra.style.width = "0%";
+            textoProgresso.innerText = "Progresso do Envio: 0%";
+            statusContador.innerText = "Iniciando disparos em lote...";
 
-        const listaDestinatarios = emailsTexto.split(',').map(e => e.trim()).filter(e => e !== "");
+            const dadosLote = {
+                destinatarios: emailsGlobais,
+                assunto: document.getElementById("loteAssunto").value,
+                mensagem: document.getElementById("loteMensagem").value
+            };
 
-        resultadoLote.style.color = '#555';
-        resultadoLote.innerText = `🔄 Processando envio para ${listaDestinatarios.length} pessoas...`;
+            // Simulação visual fluida da barra de progresso enquanto a rota responde
+            let progressoAtual = 0;
+            const intervaloSimulacao = setInterval(() => {
+                if (progressoAtual < 90) {
+                    progressoAtual += 15;
+                    barra.style.width = progressoAtual + "%";
+                    textoProgresso.innerText = `Progresso do Envio: ${progressoAtual}%`;
+                }
+            }, 120);
 
-        try {
-            const resposta = await fetch('http://127.0.0.1:5000/enviar-lote-manual', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ destinatarios: listaDestinatarios, assunto, mensagem })
-            });
+            try {
+                const response = await fetch("/enviar-lote-manual", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dadosLote)
+                });
+                const resultado = await response.json();
 
-            const dados = await resposta.json();
+                clearInterval(intervaloSimulacao);
 
-            if (resposta.ok) {
-                resultadoLote.style.color = 'green';
-                resultadoLote.innerText = '✅ ' + dados.mensagem;
-            } else {
-                resultadoLote.style.color = 'red';
-                resultadoLote.innerText = '❌ Erro: ' + dados.mensagem;
+                if (response.ok) {
+                    barra.style.width = "100%";
+                    textoProgresso.innerText = "Progresso do Envio: 100%";
+                    statusContador.innerHTML = `<span class='text-green-600 font-bold'>✔️ ${resultado.mensagem}</span>`;
+                } else {
+                    statusContador.innerHTML = `<span class='text-red-600 font-bold'>❌ ${resultado.mensagem}</span>`;
+                }
+            } catch (err) {
+                clearInterval(intervaloSimulacao);
+                statusContador.innerHTML = "<span class='text-red-600 font-bold'>❌ Erro de comunicação com o servidor Flask.</span>";
             }
-        } catch (erro) {
-            resultadoLote.style.color = 'red';
-            resultadoLote.innerText = '❌ Falha de conexão com o servidor!';
-        }
-    }
-</script>
-
+        });
+    </script>
 </body>
 </html>
